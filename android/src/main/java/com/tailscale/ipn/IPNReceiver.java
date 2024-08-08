@@ -27,19 +27,25 @@ public class IPNReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         WorkManager workManager = WorkManager.getInstance(context);
 
-        // On the relevant action, start the relevant worker, which can stay active for longer than this receiver can.
+        // On the relevant action, start the relevant worker, which can stay active for
+        // longer than this receiver can.
         if (Objects.equals(intent.getAction(), INTENT_CONNECT_VPN)) {
             workManager.enqueue(new OneTimeWorkRequest.Builder(StartVPNWorker.class).build());
         } else if (Objects.equals(intent.getAction(), INTENT_DISCONNECT_VPN)) {
             workManager.enqueue(new OneTimeWorkRequest.Builder(StopVPNWorker.class).build());
-        }
-        else if (Objects.equals(intent.getAction(), INTENT_USE_EXIT_NODE)) {
+        } else if (intent.getAction() == Intent.ACTION_BOOT_COMPLETED) {
+            Intent i = new Intent(context, MainActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(i);
+            workManager.enqueue(new OneTimeWorkRequest.Builder(StartVPNWorker.class).build());
+        } else if (Objects.equals(intent.getAction(), INTENT_USE_EXIT_NODE)) {
             String exitNode = intent.getStringExtra("exitNode");
             boolean allowLanAccess = intent.getBooleanExtra("allowLanAccess", false);
             Data.Builder workData = new Data.Builder();
             workData.putString(UseExitNodeWorker.EXIT_NODE_NAME, exitNode);
             workData.putBoolean(UseExitNodeWorker.ALLOW_LAN_ACCESS, allowLanAccess);
-            workManager.enqueue(new OneTimeWorkRequest.Builder(UseExitNodeWorker.class).setInputData(workData.build()).build());
+            workManager.enqueue(
+                    new OneTimeWorkRequest.Builder(UseExitNodeWorker.class).setInputData(workData.build()).build());
         }
     }
 }

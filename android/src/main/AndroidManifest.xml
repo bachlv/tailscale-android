@@ -15,6 +15,7 @@
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- Disable input emulation on ChromeOS -->
     <uses-feature
@@ -91,11 +92,15 @@
 
         <receiver
             android:name="IPNReceiver"
-            android:exported="true">
+            android:exported="true"
+            android:enabled="true"
+			android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="com.tailscale.ipn.CONNECT_VPN" />
                 <action android:name="com.tailscale.ipn.DISCONNECT_VPN" />
                 <action android:name="com.tailscale.ipn.USE_EXIT_NODE" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
 
